@@ -12,6 +12,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class AuthService {
+    private static final String DEMO_PSEUDONAME = "taha";
+    private static final String DEMO_PASSWORD = "taha";
+    private static final int DEMO_USER_ID = -1;
+
     private final TechnicienRepository technicienRepository;
 
     // "store" de sessions en mémoire: token -> userId
@@ -22,6 +26,20 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest req) {
+        // Compte temporaire de démonstration (non sécurisé) sans dépendance DB.
+        if (DEMO_PSEUDONAME.equals(req.getPseudoname()) && DEMO_PASSWORD.equals(req.getMotDePass())) {
+            String token = UUID.randomUUID().toString();
+            sessions.put(token, DEMO_USER_ID);
+            return new LoginResponse(
+                    DEMO_USER_ID,
+                    "admin",
+                    "Demo",
+                    "Taha",
+                    null,
+                    token
+            );
+        }
+
         Optional<Technicien> opt = technicienRepository.findByPseudoname(req.getPseudoname());
         if (opt.isEmpty()) throw new IllegalArgumentException("Pseudoname ou mot de passe invalide");
 
