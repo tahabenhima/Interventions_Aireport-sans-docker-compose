@@ -1,0 +1,252 @@
+<div class="campagny-container">
+  <div class="campagny-header">
+    <div>
+      <h1 class="campagny-title">{{ t.companyTitle }}</h1>
+      <p class="campagny-subtitle">{{ t.companySubtitle }}</p>
+    </div>
+    <button class="btn-primary" (click)="showPopup = true">
+      <i class="fas fa-plus"></i> {{ t.addCompany }}
+    </button>
+  </div>
+
+  <div class="search-box">
+    <div class="search-wrapper">
+      <i class="fas fa-search search-icon"></i>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="{{ t.searchCompany }}"
+        (input)="onSearchChange()"
+        class="search-input"
+      />
+      <button *ngIf="searchTerm" (click)="clearSearch()" class="clear-search">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="campagny-table">
+      <thead>
+        <tr>
+          <th>{{ t.id }}</th>
+          <th>{{ t.name }}</th>
+          <th class="actions-column">{{ t.actions }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="filteredCampagny().length === 0">
+          <td colspan="3" class="empty-message">{{ t.noCompanies }}</td>
+        </tr>
+        <tr *ngFor="let campagny of filteredCampagny()">
+          <td>{{ campagny.id }}</td>
+          <td class="name-cell">{{ campagny.name }}</td>
+          <td class="actions-cell">
+            <button (click)="startEdit(campagny)" class="action-btn edit-btn" title="{{ t.edit }}">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button (click)="askDelete(campagny.id!)" class="action-btn delete-btn" title="{{ t.delete }}">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="pageCount > 1" class="pagination">
+    <span class="page-info">{{ t.page }} {{ currentPage + 1 }} {{ t.of }} {{ pageCount }}</span>
+    <div class="page-controls">
+      <button (click)="goToPage(0)" [disabled]="currentPage === 0" class="page-btn">
+        <i class="fas fa-angle-double-left"></i>
+      </button>
+      <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0" class="page-btn">
+        <i class="fas fa-angle-left"></i>
+      </button>
+      <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === pageCount - 1" class="page-btn">
+        <i class="fas fa-angle-right"></i>
+      </button>
+      <button (click)="goToPage(pageCount - 1)" [disabled]="currentPage === pageCount - 1" class="page-btn">
+        <i class="fas fa-angle-double-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal pour ajouter une compagnie -->
+  <div *ngIf="showPopup" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>{{ t.addCompany }}</h3>
+        <button (click)="showPopup = false" class="close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="campagnyName">{{ t.companyName }}</label>
+          <input
+            type="text"
+            id="campagnyName"
+            [(ngModel)]="newCampagny.name"
+            placeholder="{{ t.enterCompanyName }}"
+            class="form-input"
+          />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button (click)="showPopup = false" class="btn-outline">{{ t.cancel }}</button>
+        <button (click)="addCampagny()" class="btn-primary">{{ t.add }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal pour modifier une compagnie -->
+  <div *ngIf="showEditPopup" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>{{ t.edit }}</h3>
+        <button (click)="closeEditPopup()" class="close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="editCampagnyName">{{ t.companyName }}</label>
+          <input
+            type="text"
+            id="editCampagnyName"
+            [(ngModel)]="editedName"
+            placeholder="{{ t.enterCompanyName }}"
+            class="form-input"
+          />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button (click)="closeEditPopup()" class="btn-outline">{{ t.cancel }}</button>
+        <button (click)="saveEditedCampagny()" class="btn-primary">{{ t.save }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmation de suppression -->
+  <div *ngIf="showPopupSuppression" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>{{ t.confirm }}</h3>
+        <button (click)="cancelDelete()" class="close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>{{ t.confirmDeleteCompany }}</p>
+        <p class="warning-text">
+          <i class="fas fa-exclamation-triangle"></i> {{ t.actionUndone }}
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button (click)="cancelDelete()" class="btn-outline">{{ t.cancel }}</button>
+        <button (click)="confirmDelete()" class="btn-danger">{{ t.confirm }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal "Existe déjà" -->
+  <div *ngIf="showAlreadyExistsPopup" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>{{ t.companyExists }}</h3>
+        <button (click)="closeAlreadyExistsPopupUpdate()" class="close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="warning-text">
+          <i class="fas fa-exclamation-circle"></i> {{ t.companyExists }}
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button (click)="closeAlreadyExistsPopupUpdate()" class="btn-primary">{{ t.ok }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal "Champ vide" -->
+  <div *ngIf="showEmptyFieldPopup" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>{{ t.emptyField }}</h3>
+        <button (click)="closeEmptyFieldPopup()" class="close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="warning-text">
+          <i class="fas fa-exclamation-circle"></i> {{ t.companyEmptyField }}
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button (click)="closeEmptyFieldPopup()" class="btn-primary">{{ t.ok }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal "Succès Ajout" -->
+  <div *ngIf="showSuccessPopup" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>{{ t.successAdd }}</h3>
+        <button (click)="closeSuccessPopup()" class="close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="success-text">
+          <i class="fas fa-check-circle"></i> {{ t.companyAdded }}
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button (click)="closeSuccessPopup()" class="btn-primary">{{ t.ok }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal "Succès Modification" -->
+  <div *ngIf="showEditSuccessPopup" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>{{ t.successEdit }}</h3>
+        <button (click)="closeEditSuccessPopup()" class="close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="success-text">
+          <i class="fas fa-check-circle"></i> {{ t.companyUpdated }}
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button (click)="closeEditSuccessPopup()" class="btn-primary">{{ t.ok }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal "Succès Suppression" -->
+  <div *ngIf="showDeleteSuccessPopup" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>{{ t.successDelete }}</h3>
+        <button (click)="closeDeleteSuccessPopup()" class="close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="success-text">
+          <i class="fas fa-check-circle"></i> {{ t.companyDeleted }}
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button (click)="closeDeleteSuccessPopup()" class="btn-primary">{{ t.ok }}</button>
+      </div>
+    </div>
+  </div>
+</div>

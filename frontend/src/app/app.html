@@ -1,0 +1,170 @@
+<!-- ADMIN layout visible uniquement si connecté ET rôle = admin -->
+<ng-container *ngIf="auth.isLoggedIn(); else loginOnly">
+  <ng-container *ngIf="auth.role() === 'admin'; else techLayout">
+
+    <div class="dashboard-layout">
+      <!-- Top Bar -->
+      <header class="top-bar">
+        <!-- Bouton burger -->
+        <button class="menu-toggle" id="sidebarToggle" (click)="toggleSidebar()">
+          <span></span><span></span><span></span>
+        </button>
+
+        <div class="top-right-controls">
+          <!-- Chip utilisateur -->
+          <span class="user-chip" *ngIf="auth.user() as u">👤 {{ u.firstname }} {{ u.lastname }} ({{ u.role }})</span>
+
+          <!-- Langue -->
+          <button class="language-button" (click)="toggleLang()">
+            {{ lang === 'fr' ? 'English' : 'Français' }}
+          </button>
+
+          <!-- Plane switch dark mode -->
+          <label class="plane-switch top-plane-switch">
+            <input type="checkbox" [checked]="darkMode" (change)="toggleDarkMode()" />
+            <div>
+              <div>
+                <svg viewBox="0 0 13 13">
+                  <path d="M1.55989957,5.41666667 L5.51582215,5.41666667 L4.47015462,0.108333333 L4.47015462,0.108333333 C4.47015462,0.0634601974 4.49708054,0.0249592654 4.5354546,0.00851337035 L4.57707145,0 L5.36229752,0 C5.43359776,0 5.50087375,0.028779451 5.55026392,0.0782711996 L5.59317877,0.134368264 L7.13659662,2.81558333 L8.29565964,2.81666667 C8.53185377,2.81666667 8.72332694,3.01067661 8.72332694,3.25 C8.72332694,3.48932339 8.53185377,3.68333333 8.29565964,3.68333333 L7.63589819,3.68225 L8.63450135,5.41666667 L11.9308317,5.41666667 C12.5213171,5.41666667 13,5.90169152 13,6.5 C13,7.09830848 12.5213171,7.58333333 11.9308317,7.58333333 L8.63450135,7.58333333 L7.63589819,9.31666667 L8.29565964,9.31666667 C8.53185377,9.31666667 8.72332694,9.51067661 8.72332694,9.75 C8.72332694,9.98932339 8.53185377,10.1833333 8.29565964,10.1833333 L7.13659662,10.1833333 L5.59317877,12.8656317 C5.55725264,12.9280353 5.49882018,12.9724157 5.43174295,12.9907056 L5.36229752,13 L4.57707145,13 L4.55610333,12.9978962 C4.51267695,12.9890959 4.48069792,12.9547924 4.47230803,12.9134397 L4.47223088,12.8704208 L5.51582215,7.58333333 L1.55989957,7.58333333 L0.891288881,8.55114605 C0.853775374,8.60544678 0.798421006,8.64327676 0.73629202,8.65879796 L0.672314689,8.66666667 L0.106844414,8.66666667 L0.0715243949,8.66058466 L0.0715243949,8.66058466 C0.0297243066,8.6457608 0.00275502199,8.60729104 0,8.5651586 L0.00593007386,8.52254537 L0.580855011,6.85813984 C0.64492547,6.67265611 0.6577034,6.47392717 0.619193545,6.28316421 L0.580694768,6.14191703 L0.00601851064,4.48064746 C0.00203480725,4.4691314 0,4.45701613 0,4.44481314 C0,4.39994001 0.0269259152,4.36143908 0.0652999725,4.34499318 L0.106916826,4.33647981 L0.672546853,4.33647981 C0.737865848,4.33647981 0.80011301,4.36066329 0.848265401,4.40322477 L0.89131128,4.45169723 L1.55989957,5.41666667 Z" fill="currentColor"></path>
+                </svg>
+              </div>
+              <span class="street-middle"></span>
+              <span class="cloud"></span>
+              <span class="cloud two"></span>
+            </div>
+          </label>
+
+          <!-- Déconnexion -->
+          <button class="language-button danger" (click)="auth.logout()">Déconnexion</button>
+        </div>
+      </header>
+
+      <div class="layout">
+        <!-- Mobile overlay -->
+        <div id="mobile-overlay" class="mobile-overlay" (click)="toggleSidebar()"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+          <div class="image-container">
+            <img src="assets/r.png" alt="Logo" class="logo">
+          </div>
+
+          <nav class="nav-links">
+            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              </svg>
+              <span>Tableau de bord</span>
+            </a>
+
+            <a routerLink="/campagny" routerLinkActive="active" class="nav-item">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="8" width="20" height="12" rx="2" ry="2"></rect>
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+              </svg>
+              <span>Compagnies</span>
+            </a>
+
+            <a routerLink="/solution" routerLinkActive="active" class="nav-item">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 12l2 2 4-4"></path>
+                <circle cx="12" cy="12" r="10"></circle>
+              </svg>
+              <span>Solutions</span>
+            </a>
+
+            <a routerLink="/zone" routerLinkActive="active" class="nav-item">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <rect x="7" y="7" width="10" height="10" rx="1" ry="1"></rect>
+              </svg>
+              <span>Zones</span>
+            </a>
+
+            <a routerLink="/equipement" routerLinkActive="active" class="nav-item">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              <span>Equipement</span>
+            </a>
+
+            <a routerLink="/comptoire" routerLinkActive="active" class="nav-item">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="8" width="18" height="12" rx="2" ry="2"></rect>
+                <path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+                <line x1="8" y1="16" x2="16" y2="16"></line>
+              </svg>
+              <span>Comptoires</span>
+            </a>
+
+            <a routerLink="/problem" routerLinkActive="active" class="nav-item">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>Problèmes</span>
+            </a>
+
+            <a routerLink="/project" routerLinkActive="active" class="nav-item">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+                <line x1="7" y1="7" x2="17" y2="7"></line>
+                <line x1="7" y1="11" x2="13" y2="11"></line>
+              </svg>
+              <span>Projets</span>
+            </a>
+
+        <a routerLink="/techniciens" routerLinkActive="active" class="nav-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <path d="M20 8v6"></path>
+            <path d="M23 11h-6"></path>
+          </svg>
+          <span>Techniciens</span>
+        </a>
+
+              <a routerLink="/intervention" routerLinkActive="active" class="nav-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+          </svg>
+          <span>Interventions</span>
+        </a>
+
+
+            <a routerLink="/aeroport" routerLinkActive="active" class="nav-item">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 19 4s-2 2-3.5 3.5L11 16l-8.2 1.8c-.5.1-.8.6-.8 1.1s.5 1 1 1l8.2-1.8z"></path>
+              </svg>
+              <span>Aéroports</span>
+            </a>
+          </nav>
+        </aside>
+
+
+
+        <!-- Main Content -->
+        <main class="main-content" [ngClass]="{'sidebar-hidden': !sidebarVisible && window.innerWidth > 768}">
+          <router-outlet></router-outlet>
+        </main>
+      </div>
+    </div>
+
+  </ng-container>
+
+  <!-- Layout Technicien : pas de sidebar admin -->
+  <ng-template #techLayout>
+    <router-outlet></router-outlet>
+  </ng-template>
+</ng-container>
+
+<!-- Quand NON connecté, on n’affiche que le contenu de la route (ex: /login) -->
+<ng-template #loginOnly>
+  <router-outlet></router-outlet>
+</ng-template>
